@@ -1,16 +1,17 @@
 import os
+import sys
 from dotenv import load_dotenv
 from groq import Groq
 from google import genai
-from huggingface_hub import InferenceClient
+
 
 
 class Models:
 
     load_dotenv()
-    #groq_client = Groq(api_key="")
+    groq_client = Groq(api_key=str(os.getenv('GROK_API_KEY')))
     genai_client = genai.Client(api_key=str(os.getenv('GENAI_API_KEY')))
-    #lama_client = InferenceClient(token="")
+
 
 
     def __init__(self, category, prompt):
@@ -19,20 +20,58 @@ class Models:
 
     
     def _getGroq(self):
-        pass
+        try:
+            response = self.groq_client.chat.completions.create(
+                messages= [
+                    {
+                        "role": "user",
+                        "content": self.prompt,
+                    }
+                ],
 
+                model="qwen/qwen3-32b",
+            
+                
+
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+           sys.exit(f'Error: {e}')
+
+    #Google's Gemini
     def _getGenai(self):
-
+        try:
         
-        response = self.genai_client.models.generate_content(
-            model = "gemini-3-flash-preview",
-            contents = self.prompt
-        )
+            response = self.genai_client.models.generate_content(
+                model = "gemini-3-flash-preview",
+                contents = self.prompt
+            )
 
-        return response.text
+            return response.text
+        
+        except Exception as e:
+           sys.exit(f'Error: {e}')
         
     def _getLama(self):
-        pass
+        try:
+            response = self.groq_client.chat.completions.create(
+                messages= [
+                    {
+                        "role": "user",
+                        "content": self.prompt,
+                    }
+                ],
+
+                model="llama-3.1-8b-instant",
+            
+                
+
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+           sys.exit(f'Error: {e}')
 
     def loadModel(self):
         match self.category:
